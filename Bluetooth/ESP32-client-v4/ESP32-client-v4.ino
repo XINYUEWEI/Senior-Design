@@ -6,8 +6,9 @@
 
 #include "BLEDevice.h"
 
-#define   PUMP_PIN          22 
-#define   VALVE_PIN         23
+#define   PUMP_PIN          21 
+#define   VALVE_PIN_1       22
+#define   VALVE_PIN_2       23
 #define   HEAT_PIN          32
 #define   TEMP_SENSOR_PIN   33
 
@@ -131,13 +132,14 @@ void BLEClientSetup(){
 //------------------------------ Inflation -------------------------------
 void InflationCycle(int period[2]){
     int cur_time = millis();
+    digitalWrite(PUMP_PIN,HIGH);
     if((cur_time - start_time) < period[0]){
-      digitalWrite(PUMP_PIN, HIGH);
-      digitalWrite(VALVE_PIN, LOW);
+      digitalWrite(VALVE_PIN_1, HIGH);
+      digitalWrite(VALVE_PIN_2, LOW);
     }
     else if((cur_time - start_time) < (period[0] + period[1])){
-      digitalWrite(PUMP_PIN, LOW);
-      digitalWrite(VALVE_PIN, HIGH);
+      digitalWrite(PUMP_PIN_1, LOW);
+      digitalWrite(VALVE_PIN_2, HIGH);
     }
     else start_time = cur_time;
 }
@@ -168,6 +170,7 @@ void loop() {
     else if(SW_state == "11")  InflationCycle(Period3);
     else{
       digitalWrite(PUMP_PIN, LOW);
-      digitalWrite(VALVE_PIN, LOW);
+      digitalWrite(VALVE_PIN_1, LOW);
+      digitalWrite(VALVE_PIN_2, LOW);
     }  
 }
