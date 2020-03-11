@@ -6,13 +6,20 @@
 
 #include "BLEDevice.h"
 
-#define  PUMP_PIN   22 
-#define  VALVE_PIN  23
-int   Period1[2] = {3000,2000};
+#define   PUMP_PIN          22 
+#define   VALVE_PIN         23
+#define   HEAT_PIN          32
+#define   TEMP_SENSOR_PIN   33
+
+
+int Period1[2] = {3000,2000}; //infalte | deflate (unit:ms)
+int Period2[2] = {4000,2000};
+int Period3[2] = {5000,2000};
 
 std::string SW_state = "00";
 int start_time = 0;
 
+//------------------------------ Bluetooth -------------------------------
 // The remote service we wish to connect to.
 static BLEUUID serviceUUID("4fafc201-1fb5-459e-8fcc-c5c9c331914b");
 // The characteristic of the remote service we are interested in.
@@ -77,20 +84,12 @@ bool clientInit(){
 
 bool clientReceive(){
     if(pRemoteCharacteristic->canRead()) {
-        //std::string value = pRemoteCharacteristic->readValue();
         SW_state = pRemoteCharacteristic->readValue();
-       
         Serial.println(SW_state.c_str());
-
-        //Serial.print("The characteristic value was: ");
-        //Serial.println(value.c_str());        
-        //state = atoi(value.c_str());
-        //if(state == 1) Serial.println("yes");
     }
 
     if(pRemoteCharacteristic->canNotify())
         pRemoteCharacteristic->registerForNotify(notifyCallback);
-
     connected = true;
 }
 
@@ -118,10 +117,6 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
 
 void BLEClientSetup(){
     BLEDevice::init("");
-
-    // Retrieve a Scanner and set the callback we want to use to be informed when we
-    // have detected a new device.  Specify that we want active scanning and start the
-    // scan to run for 5 seconds.
     BLEScan* pBLEScan = BLEDevice::getScan();
     pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
     pBLEScan->setInterval(1349);
@@ -132,6 +127,8 @@ void BLEClientSetup(){
     clientInit();
 }
 
+
+//------------------------------ Inflation -------------------------------
 void InflationCycle(int period[2]){
     int cur_time = millis();
     if((cur_time - start_time) < period[0]){
@@ -146,44 +143,31 @@ void InflationCycle(int period[2]){
 }
 
 
+//------------------------------ Heating ---------------------------------
+void Heating(){
+  
+}
+
+
 void setup() {
     Serial.begin(115200);
     BLEClientSetup();
     pinMode(PUMP_PIN,OUTPUT);
     pinMode(VALVE_PIN,OUTPUT);
+    pinMode(HEAT_PIN,OUTPUT);
+    pinMode(TEMP_SENSOR_PIN,INPUT);
     start_time = millis();
 } 
 
 void loop() {
     int cur_time = millis();
     clientReceive();
-//    if (connected) {
-//      //String newValue = "Time since boot: " + String(millis()/1000);
-//     // Serial.println("Setting new characteristic value to \"" + newValue + "\"");
-//  
-//      // Set the characteristic's value to be the array of bytes that is actually a string.
-//     // pRemoteCharacteristic->writeValue(newValue.c_str(), newValue.length());
-//  }else if(doScan){
-//      BLEDevice::getScan()->start(0);  // this is just eample to start scan after disconnect, most likely there is better way to do it in arduino
-//  }
 
-    if(SW_state == "10"){
-      InflationCycle(Period1);
-//      if((cur_time - start_time) < Period10){
-//        digitalWrite(PUMP_PIN, HIGH);
-//        digitalWrite(VALVE_PIN, LOW);
-//      }
-//      else if((cur_time - start_time) < Period11){
-//        digitalWrite(PUMP_PIN, LOW);
-//        digitalWrite(VALVE_PIN, HIGH);
-//      }
-//      else{
-//         start_time = cur_time;
-//      }
-//      Serial.println("yes");
-//      digitalWrite(PUMP_PIN, LOW);
-//      digitalWrite(VALVE_PIN, LOW);
-    }
- 
- // delay(100); // Delay a second between loops.
-} 
+    if(SW_state == "10")  InflationCycle(Period1);
+    else if(SW_state == "01")  InflationCycle(Period2);
+    else if(SW_state == "11")  InflationCycle(Period3);
+    else{
+      digitalWrite(PUMP_PIN, LOW);
+      digitalWrite(VALVE_PIN, LOW);
+    }  
+}
