@@ -8,11 +8,11 @@
 
 #include "BLEDevice.h"
 
-#define   PUMP_PIN          21 
+#define   PUMP_PIN          33 
 #define   VALVE_PIN_1       22
 #define   VALVE_PIN_2       23
 #define   HEAT_PIN          32
-#define   TEMP_SENSOR_PIN   33
+#define   TEMP_SENSOR_PIN   21
 
 //inflation levels 
 int Inflation_Period1[2] = {5000,5000}; //infalte | deflate (unit:ms)

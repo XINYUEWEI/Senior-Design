@@ -11,8 +11,8 @@
 
 #define IN_SW_1 23 // Inflation switch pin 1
 #define IN_SW_2 22 // Inflation switch pin 2
-#define H_SW_1 23 // Heating switch pin 1
-#define H_SW_2 22 // Heating switch pin 2
+#define H_SW_1 32 // Heating switch pin 1
+#define H_SW_2 33 // Heating switch pin 2
 
 
 //------------------------------------ Bluetooth --------------------------------------
